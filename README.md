@@ -24,12 +24,8 @@ This repository provides a comprehensive guide and implementation for GenCELLAge
 
 ### API Key Configuration 
 
-To use run GUI, you must set up your API key.
-
-<details>
 Set API Key via Environment Variable
 
-- Linux/macOS: 
 ```bash
 export GOOGLE_API_KEY=<your-gemini-api-key>
 ```
