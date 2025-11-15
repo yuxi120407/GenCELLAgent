@@ -1,4 +1,4 @@
-# 🤖 GenCELLAgent: GenCellAgent: Generalizable, Training-Free Cellular Image Segmentation via Large Language Model Agents
+# 🤖 GenCellAgent: Generalizable, Training-Free Cellular Image Segmentation via Large Language Model Agents
 
 This repository provides a comprehensive guide and implementation for GenCELLAgent from scratch using Google's Gemini as the Large Language Model (LLM) of choice.
 
