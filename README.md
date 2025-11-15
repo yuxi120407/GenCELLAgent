@@ -17,7 +17,7 @@ Unlike traditional models that require fine-tuning or dataset-specific retrainin
 - **Self-Evolving Memory:** Stores past results and configurations to improve future segmentation sessions.
 
 ### 📈 Performance
-Across multiple benchmark datasets — including **LiveCell**, **TissueNet**, **PlantSeg**, and **Lizard** — GenCELLAgent achieves:
+Across multiple benchmark datasets — including **LiveCell**, **TissueNet**, **PlantSeg**, **Lizard** and **CellMap organelle data** — GenCELLAgent achieves:
 - +15.7% mean segmentation accuracy improvement over specialist models.
 - +37.6% average IoU gain on ER and mitochondria datasets.
 - Strong generalization to unseen organelles (e.g., Golgi) using iterative refinement and test-time scaling.
