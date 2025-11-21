@@ -31,7 +31,6 @@ GenCELLAgent’s architecture includes three coordinated modules:
 This design enables GenCELLAgent to perform segmentation tasks robustly without retraining, adapting to new domains with minimal supervision.
 ## 🚀 Getting Started
 
-
 ### Installation
 
 1. Clone the repository:
@@ -52,3 +51,5 @@ Set API Key via Environment Variable
 ```bash
 export GOOGLE_API_KEY=<your-gemini-api-key>
 ```
+
+

@@ -19,7 +19,6 @@ from src.tools.launch_human_correction import launch_sam_correction_tool
 
 from src.utils.history_check import txt_from_each_subdir_sorted, history_lookup, extract_hitl_summaries
 
-#from src.tools.planner import planning_report
 
 from src.utils.io import write_to_file, read_file
 from src.config.logging import logger
@@ -814,11 +813,8 @@ else:
         st.session_state.agent.register(Name.IMAGESEGMENTATION, segment_image)
         st.session_state.agent.register(Name.SEGMENTATIONEVALUATION, segmentation_evaluator)
         st.session_state.agent.register(Name.ONESHOTSEGMENTATION, seggpt_inference_img)
-        #st.session_state.agent.register(Name.ENSEMBLEREFERENCE, ensemble_masks)
-        #st.session_state.agent.register(Name.MITONET, mitonet_inference)
-        #st.session_state.agent.register(Name.ENSEMBLETEXT, ensemble_masks_only_text) 
         st.session_state.agent.register(Name.SUMMARIZER, summarizer_report)
-        #st.session_state.agent.register(Name.HUMANCORRECTION, launch_sam_correction_tool)
+
         
         
         
