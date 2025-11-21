@@ -6,7 +6,7 @@ This section lists pretrained models supported in this project. Please replace t
 
 - [LISA](#lisa)
 - [SegGPT](#seggpt)
-- [Miro-SAM](#miro-sam)
+- [Micro-SAM](#miro-sam)
 - [Cellpose](#cellpose)
 
 ---
