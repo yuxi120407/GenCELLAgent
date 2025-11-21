@@ -29,7 +29,7 @@ This section lists pretrained models supported in this project. Please replace t
 
 ---
 
-## 🔹 Miro-SAM
+## 🔹 Micro-SAM
 
 - **Description**: Micro-region guided variant of Segment Anything Model (SAM) for microscopy.
 - **Usage**: Supports point, box, and mask prompting.
