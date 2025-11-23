@@ -1,6 +1,6 @@
 # 🧠 Pretrained Models
 
-This section lists pretrained models supported in this project. Please replace the `[Download Link]` placeholders with actual URLs to your models.
+This section lists pretrained models supported in this project. 
 
 ## 📋 Table of Contents
 
