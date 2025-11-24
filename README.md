@@ -50,6 +50,7 @@ Set API Key via Environment Variable
 
 ```bash
 export GOOGLE_API_KEY=<your-gemini-api-key>
+export SEARCH_API_KEY=<your-serpapi-api-key>
 ```
 
 
