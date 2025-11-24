@@ -16,12 +16,14 @@ CREDENTIALS_PATH = './credentials/key.yml'
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
 
+SEARCH_API_KEY = os.getenv("SEARCH_API_KEY")
+
 class SerpAPIClient:
     """
     A client for interacting with the SERP API for performing search queries.
     """
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key=SEARCH_API_KEY):
         """
         Initialize the SerpAPIClient with the provided API key.
 
@@ -30,7 +32,6 @@ class SerpAPIClient:
         api_key : str
             The API key for authenticating with the SERP API.
         """
-        self.api_key = api_key
         self.base_url = "https://serpapi.com/search.json"
 
     def __call__(self, query: str, engine: str = "google", location: str = "") -> Union[Dict[str, Any], Tuple[int, str]]:
