@@ -40,6 +40,7 @@ python run_model_selection.py \
 ### Dataset Acquisition
 Obtain the Damond_2019_Pancreas IMC dataset from:
 - **Source:** [imcdatasets - Damond_2019_Pancreas](https://bodenmillergroup.github.io/imcdatasets/reference/Damond_2019_Pancreas.html)
+- **Test Set:** we used 64 whole-cell images from patient 6089 as the test set.
 
 ### Processing Workflow
 
