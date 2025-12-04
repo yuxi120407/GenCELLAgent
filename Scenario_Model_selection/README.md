@@ -33,13 +33,6 @@ python run_model_selection.py \
     --model_selection_csv model_selection.csv \
     --experiment_root /path/to/final_results
 ```
-
-## Pipeline Overview
-1. Segment images with both Cellpose and Micro-SAM
-2. Analyze performance metrics in notebook
-3. Automatically select best model per image
-4. Generate final segmentation results
-
 ---
 
 ## Example: IMC Dataset (Damond_2019_Pancreas)
