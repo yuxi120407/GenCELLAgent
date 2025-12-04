@@ -8,6 +8,7 @@ This section lists pretrained models supported in this project.
 - [SegGPT](#seggpt)
 - [Micro-SAM](#miro-sam)
 - [Cellpose](#cellpose)
+- [Neural_Style](#neural_style)
 
 ---
 
@@ -42,7 +43,12 @@ This section lists pretrained models supported in this project.
 
 - **Description**: Generalist deep learning model for segmenting cells and nuclei.
 - **Download**: [https://github.com/MouseLand/cellpose/tree/main]
+- 
+---
+## 🔹 Neural_Style
 
+- **Description**: Pretrained model for Image style comparison.
+- **Download**: [https://huggingface.co/fdan/neural_style_transfer_vgg/resolve/main/vgg_conv.pth]
 
 ---
 
