@@ -43,7 +43,7 @@ This section lists pretrained models supported in this project.
 
 - **Description**: Generalist deep learning model for segmenting cells and nuclei.
 - **Download**: [https://github.com/MouseLand/cellpose/tree/main]
-- 
+
 ---
 ## 🔹 Neural_Style
 
