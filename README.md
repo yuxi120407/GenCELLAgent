@@ -25,7 +25,7 @@ Across multiple benchmark datasets, including **LiveCell**, **TissueNet**, **Pla
 ### 🧠 Architecture Overview
 GenCELLAgent’s architecture includes three coordinated modules:
 1. **Planner (LLM):** Analyzes task context and decides segmentation routes.
-2. **Executor:** Runs selected tools (Cellpose, µSAM, etc.) and aggregates outputs.
+2. **Executor:** Runs selected tools (Cellpose, µSAM, etc.).
 3. **Evaluator:** Uses VLM-based quality scoring to iteratively refine predictions.
 
 This design enables GenCELLAgent to perform segmentation tasks robustly without retraining, adapting to new domains with minimal supervision.
