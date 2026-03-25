@@ -34,23 +34,164 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
 ### Installation
 
 1. Clone the repository:
-   ```
+   ```bash
    git clone https://github.com/yuxi120407/GenCELLAgent.git
    cd GenCELLAgent
    ```
 
-2. Set up a virtual environment:
+2. Create and activate the conda environment:
+   ```bash
+   conda env create -f environment.yml
+   conda activate gencell
    ```
-    conda env create -f env.yaml -n myenvname
+
+   This installs Python 3.12, PyTorch 2.7.0 (CUDA 12.6), and all required dependencies.
+
+3. Install SAM3 (Segment Anything Model 3) as a local editable package:
+   ```bash
+   cd src/sam3
+   pip install -e ".[notebooks,train,dev]"
+   cd ../..
    ```
 
-### API Key Configuration 
+   > **Note:** SAM3 must be installed manually after environment creation. The source is already included at `src/sam3/`.
 
-Set API Key via Environment Variable
+### API & Credentials Configuration
 
+GenCellAgent requires three different API setups to function fully: **Vertex AI** (for the main reasoning loop), **Google AI Studio** (for tool-level summarization), and **SerpAPI** (for web searching).
+
+#### 1. Vertex AI Setup (Main Agent)
+The core "brain" of the agent uses Google Cloud Vertex AI. To authenticate, you must generate a Service Account JSON key:
+
+1.  **Create a Google Cloud Project:**
+    - Go to the [Google Cloud Console](https://console.cloud.google.com/).
+    - Click the project dropdown at the top and select **"New Project"**. Name it and click "Create".
+2.  **Enable the Vertex AI API:**
+    - In the top search bar, search for **"Vertex AI API"**.
+    - Click on it and click the blue **"Enable"** button.
+3.  **Generate a Service Account JSON Key:** 
+    - Open the left-hand navigation menu (hamburger icon) and go to **IAM & Admin > Service Accounts**.
+    - Click **"+ CREATE SERVICE ACCOUNT"** at the top.
+    - Give it a name (e.g., `gencell-agent-sa`) and click "Create and Continue".
+    - In the "Select a role" dropdown, search for and select **"Vertex AI User"**. Click "Continue", then "Done".
+    - You will now see your new service account in the list. Click on the **three vertical dots (Actions)** on the right side of your service account and select **"Manage keys"**.
+    - Click **"ADD KEY" > "Create new key"**.
+    - Choose **JSON** and click **"Create"**. The file will automatically download to your computer.
+4.  **Local Configuration:**
+    - Move the downloaded `.json` file into your project folder (e.g., `src/credentials/my-project-key.json`).
+    - Open `config/config.yml` and update the settings:
+      ```yaml
+      project_id: your-gcp-project-id  # Found on your GCP dashboard homepage
+      region: us-central1
+      credentials_json: /absolute/path/to/your/service-account-key.json
+      model_name: gemini-2.5-flash
+      ```
+
+#### 2. .env File Setup (Tools)
+For specialized tools (Search, Evaluation, etc.), create a `.env` file in the root of the project:
 ```bash
-export GOOGLE_API_KEY=<your-gemini-api-key>
-export SEARCH_API_KEY=<your-serpapi-api-key>
+touch .env
 ```
 
+Add the following keys to your `.env` file:
 
+- **Google API Key (AI Studio):**
+  1. Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+  2. Add it to `.env`: `GOOGLE_API_KEY=your_ai_studio_key`
+  
+- **SerpAPI Key (Search):**
+  1. Get an API key from [SerpAPI](https://serpapi.com/).
+  2. Add it to `.env`: `SERPAPI_API_KEY=your_serp_api_key`
+
+---
+
+## 💻 Running the Demo
+
+Launch the Streamlit interface:
+```bash
+streamlit run GUI_demo.py
+```
+
+## 🔧 Developer Guide: Add a New Tool
+
+Use `cellpose` as the example. The same pattern works for other tools.
+
+### 1. Install the tool env
+
+If the tool needs its own environment, install it there and keep the Python path.
+
+Example:
+
+```bash
+python -m venv /path/to/cellpose_env
+/path/to/cellpose_env/bin/pip install cellpose
+```
+
+In this project, `cellpose` uses:
+
+```bash
+/home/idies/workspace/Storage/xyu1/persistent/pytorch_env/micro-sam/bin/python
+```
+
+### 2. Add a runner
+
+Put env-specific execution in a small runner script, not in `GUI_demo.py`.
+
+Example files:
+
+- [cell_segmentation_env_runner.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/tools/cell_segmentation_env_runner.py)
+- [cell_segmentation_models.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/tools/cell_segmentation_models.py)
+
+The wrapper calls the env Python with `subprocess.run(...)` and returns standard output paths.
+
+### 3. Return standard output keys
+
+To reuse the current GUI display logic, return:
+
+- `segment_save_path:`
+- `segment_mask_path:`
+
+Example:
+
+```python
+return f"Cellpose segmentation completed successfully in segment_save_path:{overlay_path}, the corresponding mask saved in segment_mask_path:{mask_path}"
+```
+
+### 4. Add the tool to `GUI_demo.py`
+
+In [GUI_demo.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/GUI_demo.py):
+
+1. Import the wrapper.
+2. Add a new enum name in `Name`.
+3. Register the tool.
+4. If it is a segmentation tool, add it to the retry-count logic in `Agent.act(...)`.
+
+Example registration:
+
+```python
+st.session_state.agent.register(Name.CELLPOSE, cellpose_segment)
+```
+
+### 5. Update the prompts
+
+Also update these two files so the LLM knows when to use the new tool:
+
+- [react_new_v9_auto_golgi_25.txt](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/prompt/react_new_v9_auto_golgi_25.txt)
+- [planning_v8_v5_golgi_auto.txt](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/prompt/planning_v8_v5_golgi_auto.txt)
+
+Add:
+
+- the tool name to the tool list
+- a short tool description
+- one JSON action example
+- a rule for when the planner should choose it
+
+### 6. Final check
+
+Before using the tool, verify:
+
+- the env Python path is correct
+- the tool is added to `Name`
+- the tool is registered in `GUI_demo.py`
+- the prompt files mention it
+- it returns `segment_save_path` and `segment_mask_path`

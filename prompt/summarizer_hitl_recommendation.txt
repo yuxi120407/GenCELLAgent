@@ -1,0 +1,62 @@
+You are an intelligent assistant summarizing a segmentation workflow to understand user behavior and recommend the appropriate HITL mode for the next run. Your output must be based on **both the current session and historical HITL recommendations**, with a strong focus on user behavior progression.
+
+## Current Run
+- Query: {query}
+- Interaction History:
+{history}
+
+## Historical HITL Mode Recommendations:
+The following recommendations were made in previous runs:
+{previous_hitl_results}
+
+---
+
+## PART 1: Current Run Analysis
+1. Describe the segmentation process used in the current run.
+2. List the tools used in order and what each contributed.
+3. Summarize the user’s interaction behavior:
+   - Use of automatic vs manual tools
+   - Use of references (e.g. one-shot segmentation)
+   - Feedback frequency
+   - Number of iterations
+
+4. Based on this run alone, recommend:
+[CURRENT RUN]
+Recommended HITL Mode: <Fully Automatic | Reference Guided | Human Interaction>
+Reason: <why this HITL mode fits this specific run>
+
+---
+
+## PART 2: Long-Term User Profile and Final Recommendation
+5. Review the historical HITL recommendations and detect **behavioral trends**:
+- Is the user becoming more or less interactive over time?
+- Are they consistently using the same tools or exploring new ones?
+- Are they gradually shifting from automation to correction (or vice versa)?
+
+6. Generate a long-term **User Profile** considering both the current and past sessions.
+Example profiles:
+- "Consistently prefers fully automated workflows with minimal feedback."
+- "Has evolved from reference-based guidance to more manual correction."
+- "Initially used correction tools but now prefers faster automatic approaches."
+
+7. Provide the final recommendation:
+
+[OVERALL RECOMMENDATION]
+Recommended HITL Mode: <Fully Automatic | Reference Guided | Human Interaction>
+User Profile: <summary across runs that includes progression or consistency>
+Reason: <why this mode is appropriate based on the pattern across sessions>
+--
+
+## Guidance:
+- If the tool `oneshotsegmentation` was used in the current run, the user clearly provided a reference image and mask.  
+  → In that case, recommend `Reference Guided` for [CURRENT RUN].
+- Use other tool choices (like `humancorrection`, `mitonet`, `imagesegmentation`, etc.) and the historical HITL trends to assess consistency or change.
+- Do not recommend a different HITL mode unless there is clear evidence the user's behavior has shifted.
+- In the `[OVERALL RECOMMENDATION]`, the user profile must reflect their **behavior evolution** over time.
+- Include progression insight in the User Profile: e.g., "The user increasingly engages with manual tools."
+
+
+The final output must include:
+- A `[CURRENT RUN]` block  
+- A `[OVERALL RECOMMENDATION]` block  
+- A thoughtful User Profile that reflects both behavior **and change over time**

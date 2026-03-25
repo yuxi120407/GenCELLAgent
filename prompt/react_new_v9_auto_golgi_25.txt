@@ -10,12 +10,14 @@ Your goal is to reason about the query and decide on the best course of action t
 
 Previous reasoning steps and observations: {history}
 
+Current Segmentation Retry Count: {retry_count} / {max_retries}
+
 Available tools: {tools}
 
 Instructions:
 1. Analyze the query, previous reasoning steps, and observations.
 2. Decide on the next action: use a tool or provide a final answer.
-3. Respond in the following JSON format:
+3. Respond in the following JSON format. Your entire response MUST be a single, valid JSON block. Do not add conversational text like "Thought:" or "Action:" before the JSON.
 
 If you need to use a tool:
 {{
@@ -36,13 +38,30 @@ For google tool, this is a web search tool to search the visual characteristics�
     "reason": "Explanation of why you chose this tool",
     "input": {{
       "search_query": "<insert the search of visual characteristics—such as shape, texture, and location—rather than functionality of the segment object in the query>",
-      "location":'',
+      "location":''
     }}
   }}
 }}
 
 
-For imagesegmentation tool, this is a general image segmentation tool for object that cannot find from the speific tools, please using following JSON format:
+For oneshotsegmentation tool, this is a few-shot image segmentation tool (SegGPT) used when the user provides a reference image and mask. Please use the following JSON format:
+
+{{
+  "thought": "Your detailed reasoning about why one-shot segmentation is appropriate",
+  "action": {{
+    "name": "oneshotsegmentation",
+    "reason": "Explanation of why you chose this tool",
+    "input": {{
+      "image_path": "<insert the image_path provided in the query>",
+      "prompt_image_path": "<insert the prompt_image_path provided in the query>",
+      "prompt_mask_path": "<insert the prompt_mask_path provided in the query>",
+      "save_dir": "<insert the save_directory provided in the query>"
+    }}
+  }}
+}}
+
+
+For imagesegmentation tool, this is a general image segmentation tool that uses Gemini to generate bounding boxes and SAM3 to segment. Please use the following JSON format:
 
 {{
   "thought": "Your detailed reasoning about the description of the segment object",
@@ -51,14 +70,16 @@ For imagesegmentation tool, this is a general image segmentation tool for object
     "reason": "Explanation of why you chose this tool",
     "input": {{
       "image_path": "<insert the image_path provided in the query>",
-      "prompt": <insert the segmentation_prompt obtained from the search tool's output when first use or insert the refined_segmentation_prompt from the segmentationevaluation tool's output when second use>"
+      "prompt": "<insert the segmentation_prompt obtained from the search tool's output when first use or insert the refined_segmentation_prompt from the segmentationevaluation tool's output when second use>",
+      "save_dir": "<insert the save_directory provided in the query>",
+      "retry_count": {retry_count}
     }}
   }}
 }}
 
 
 
-For segmentationevaluation tool, this is a segmentation performance evaluation tool based on the text visual characteristics, please using following format:
+For segmentationevaluation tool, this is a segmentation performance evaluation tool using Gemini VLM. It evaluates the mask quality and returns a score plus a refined segmentation prompt. Please use the following format:
 
 {{
   "thought": "Your detailed reasoning about the evaluation of the segment object image",
@@ -66,11 +87,10 @@ For segmentationevaluation tool, this is a segmentation performance evaluation t
     "name": "segmentationevaluation",
     "reason": "Explanation of why you chose this tool",
     "input": {{
-      "image_path": "<insert the save_path provided of the ouput in imagesegmentation (when you need evaluate imagesegmentation tool performance) or seggpt_save_path provided of the output in oneshotsegmentation tool (when you need evaluate oneshotsegmentation tool performance)>",
-      "segmentation_prompt": <insert the segmentation_prompt obtained from the search tool's output when first use or insert the refined_segmentation_prompt from the segmentationevaluation tool's output when second use>",
-      "evaluation_prompt_path": "/home/idies/workspace/Storage/xyu1/persistent/Langchain/result_fully_automatic/in_context_prompt_golgi.json",
-      "image_example_1_path": "/home/idies/workspace/Storage/xyu1/persistent/Langchain/ours_test/test_images/golgi/images/image_53.png",
-      "image_example_2_path":"/home/idies/workspace/Storage/xyu1/persistent/Langchain/ours_test/test_images/golgi/overlay_all/image_53.png"
+      "image_path": "<insert the original image_path provided in the query>",
+      "mask_path": "<insert the segment_mask_path from the imagesegmentation tool's output>",
+      "segmentation_prompt": "<insert the segmentation_prompt obtained from the search tool's output, OR the original user query if no search was performed, OR the refined_segmentation_prompt from the previous segmentationevaluation tool's output>",
+      "save_dir": "<insert the save_directory provided in the query>"
     }}
   }}
 }}
@@ -84,8 +104,7 @@ For summarizer tool, this is the summarize tool only used in the final to genera
     "name": "summarizer",
     "reason": "Explanation of why you chose this tool",
     "input": {{
-      "save_dir": "<insert the save_directory provided in the query>",
-      "process_text": "<insert the prompt_image_path and prompt_mask_path in the query and previous reasoning steps and observations from the history>",
+      "save_dir": "<insert the save_directory provided in the query>"
     }}
   }}
 }}
@@ -112,9 +131,10 @@ Remember:
 
 1. Start with the Google tool: Use the google search tool to:
   -- Retrieve visual characteristics of the segmented object (e.g., shape, texture, structure, location).
-  -- Generate the initial segmentation prompt, which will be passed to the imagesegmentation tool.
+  -- Generate the initial segmentation prompt, which will be passed to the planned segmentation tool.
+  -- IMPORTANT: If the target organelle's visual characteristics and segmentation prompt are already present in your `historical_information` (specifically within the "KNOWLEDGE BASE" section), DO NOT use the google tool. Skip this step and immediately use the appropriate segmentation tool (as defined by your plan and the user's selected mode) using the saved `segmentation_prompt` from memory.
 
-2. Run the imagesegmentation tool:
+2. Run the chosen segmentation tool:
   -- Use the segmentation prompt obtained from the Google tool as input.
   -- Produce an initial segmentation result.
 
@@ -134,7 +154,11 @@ Remember:
 5. Repeat the imagesegmentation and segmentationevaluation cycle:
   -- Segmentation must always be followed by evaluation.
   -- Always use the most recent refined prompt to inform the next segmentation.
-  -- Stop only when the evaluation tool indicates satisfactory performance.
+  -- Stop only when the evaluation tool indicates satisfactory performance OR if you have completed EXACTLY {max_retries} segmentation attempts.
+  -- MAXIMUM RETRY LIMIT: You must run the `imagesegmentation` tool up to {max_retries} times if the score remains unsatisfactory. Do not stop early just because a score decreases; use all {max_retries} attempts to try and find a better prompt. 
+  -- Once you evaluate the final {max_retries}th attempt, if the score is still unsatisfactory, DO NOT try to segment again. Instead, look at the scores from all {max_retries} attempts, select the best result, and immediately proceed to the `summarizer` tool.
   
 6. Finalization:
-  -- Once segmentation is deemed satisfactory, invoke the summarizer tool to produce a final summary of the process and results.
+  -- Once segmentation is deemed satisfactory, OR you hit the {max_retries}-attempt limit, you MUST invoke the summarizer tool to produce a final summary of the process and results.
+  -- IMPORTANT: You may only call the `summarizer` tool EXACTLY ONCE. 
+  -- If you see that the `summarizer` tool has already been used and its observation is in the history, your VERY NEXT ACTION MUST be to output your final `"answer"` to end the interaction. Do not use any more tools.
