@@ -176,8 +176,8 @@ st.session_state.agent.register(Name.CELLPOSE, cellpose_segment)
 
 Also update these two files so the LLM knows when to use the new tool:
 
-- [react_new_v9_auto_golgi_25.txt](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/prompt/react_new_v9_auto_golgi_25.txt)
-- [planning_v8_v5_golgi_auto.txt](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/prompt/planning_v8_v5_golgi_auto.txt)
+- [prompt/react.txt](prompt/react.txt)
+- [prompt/planning.txt](prompt/planning.txt)
 
 Add:
 
