@@ -29,6 +29,11 @@ GenCELLAgent’s architecture includes three coordinated modules:
 3. **Evaluator:** Uses VLM-based quality scoring to iteratively refine predictions.
 
 This design enables GenCELLAgent to perform segmentation tasks robustly without retraining, adapting to new domains with minimal supervision.
+
+## 🖥️ GUI Demo
+
+![GenCELLAgent GUI Demo](Screenshot_GUI_demo.png)
+
 ## 🚀 Getting Started
 
 ### Installation
