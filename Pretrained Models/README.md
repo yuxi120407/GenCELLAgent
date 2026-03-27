@@ -4,7 +4,7 @@ This section lists pretrained models supported in this project.
 
 ## 📋 Table of Contents
 
-- [LISA](#lisa)
+- [SAM3](#sam3)
 - [SegGPT](#seggpt)
 - [Micro-SAM](#miro-sam)
 - [Cellpose](#cellpose)
