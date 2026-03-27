@@ -12,11 +12,11 @@ This section lists pretrained models supported in this project.
 
 ---
 
-## 🔹 LISA
+## 🔹 SAM3
 
 - **Description**: Lightweight Interactive Segmentation Assistant.
 - **Usage**: text based image segmentation.
-- **Download**: [https://huggingface.co/xinlai/LISA-13B-llama2-v1]
+- **Download**: [https://huggingface.co/facebook/sam3]
 
 
 ---
