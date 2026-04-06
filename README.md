@@ -84,13 +84,39 @@ The core "brain" of the agent uses Google Cloud Vertex AI. To authenticate, you 
     - Choose **JSON** and click **"Create"**. The file will automatically download to your computer.
 4.  **Local Configuration:**
     - Move the downloaded `.json` file into your project folder (e.g., `src/credentials/my-project-key.json`).
-    - Open `config/config.yml` and update the settings:
-      ```yaml
-      project_id: your-gcp-project-id  # Found on your GCP dashboard homepage
-      region: us-central1
-      credentials_json: /absolute/path/to/your/service-account-key.json
-      model_name: gemini-2.5-flash
+    - Create the `config` directory if it doesn't exist:
+      ```bash
+      mkdir -p config
       ```
+    - Copy the example config file and edit it with your credentials:
+      ```bash
+      cp config/config.example.yml config/config.yml
+      ```
+    - Edit `config/config.yml` with your actual values:
+      ```yaml
+      # GenCELLAgent Configuration File
+      # Fill in your Google Cloud / Vertex AI credentials below
+
+      # Your Google Cloud Project ID (found on your GCP dashboard homepage)
+      project_id: "your-gcp-project-id"
+
+      # Google Cloud region (e.g., us-central1, us-east1, etc.)
+      region: "us-central1"
+
+      # Path to your Google Cloud service account JSON credentials file
+      # Use absolute path (e.g., /home/user/GenCELLAgent/src/credentials/my-key.json)
+      # You can leave this empty if using environment variables or default credentials
+      credentials_json: "/absolute/path/to/your/service-account-key.json"
+
+      # Gemini model name to use
+      # Options: gemini-3-flash-preview, gemini-3-pro-preview, gemini-2.5-flash, etc.
+      model_name: "gemini-3-flash-preview"
+      ```
+    - **Note:** If `config/config.yml` is not found, the system will fall back to environment variables:
+      - `GOOGLE_PROJECT_ID`
+      - `GOOGLE_REGION`
+      - `GOOGLE_APPLICATION_CREDENTIALS`
+      - `MODEL_NAME`
 
 #### 2. .env File Setup (Tools)
 For specialized tools (Search, Evaluation, etc.), create a `.env` file in the root of the project:
@@ -116,6 +142,86 @@ Launch the Streamlit interface:
 ```bash
 streamlit run GUI_demo.py
 ```
+
+### 📁 Understanding Project Paths and Outputs
+
+GenCELLAgent uses a centralized path configuration system defined in `src/config/paths.py`. This section explains where your data is stored and what each directory is used for.
+
+#### Path Configuration (`src/config/paths.py`)
+
+| Path Variable | Default Location | Purpose |
+|--------------|------------------|---------|
+| **`BASE_WORKSPACE`** | `/home/idies/workspace/Storage/xyu1/persistent` | Base folder containing your conda/Python environments. **Modify this** to match your system's workspace location. |
+| **`REPO_ROOT`** | Auto-detected | Root directory of the GenCELLAgent repository (where you cloned the project). |
+| **`OUTPUT_IMAGES_DIR`** | `{REPO_ROOT}/output_images/` | **Main output directory** - All segmentation results are saved here, organized by timestamp. Each run creates a subfolder like `20260406_150000/`. |
+| **`IMG_EXAMPLE_DIR`** | `{REPO_ROOT}/examples/` | Storage for uploaded input images used in the GUI demo. |
+| **`KNOWLEDGE_BASE_PATH`** | `{REPO_ROOT}/output/memory/knowledge_base.json` | **Agent memory** - Stores learned patterns, successful strategies, and historical context for future sessions. |
+| **`PROMPT_TEMPLATE_PATH`** | `{REPO_ROOT}/prompt/react.txt` | Main ReAct (Reasoning + Acting) prompt template for the agent loop. |
+| **`PLANNING_PROMPT_TEMPLATE_PATH`** | `{REPO_ROOT}/prompt/planning.txt` | Planning phase prompt template - helps the agent decide which tools to use. |
+| **`SUMMARIZER_PROMPT_TEMPLATE_PATH`** | `{REPO_ROOT}/prompt/summarizer_hitl_recommendation.txt` | Human-in-the-loop (HITL) summarization prompt for generating recommendations. |
+
+#### Output Directory Structure
+
+When you run a segmentation task, GenCELLAgent creates a timestamped folder in `output_images/`:
+
+```
+output_images/
+└── 20260406_150000/              # Timestamp: YYYYMMDD_HHMMSS
+    ├── agent_trace.txt            # Complete log of agent reasoning and actions
+    ├── summary.txt                # Final HITL summary and recommendations
+    ├── next_hitl_level.json       # Recommended human-in-the-loop mode for next run
+    ├── your_image_segmentation_v1.png       # Segmentation overlay (original + mask)
+    ├── your_image_segmentation_v1_mask.png  # Binary segmentation mask
+    ├── your_image_iter2.png       # Intermediate results from iteration 2
+    ├── your_image_iter2_mask.png  # Intermediate masks
+    └── human_correction_iter3.png # Results after human correction (if used)
+```
+
+#### Customizing Paths
+
+To change the default paths (e.g., if you're not using the IDIES system):
+
+1. Open `src/config/paths.py`
+2. Modify `BASE_WORKSPACE` to your local workspace:
+   ```python
+   BASE_WORKSPACE = "/your/custom/workspace/path"
+   ```
+3. All other paths are relative to `REPO_ROOT` and will adjust automatically
+
+**Example for local development:**
+```python
+BASE_WORKSPACE = "/home/username/projects/workspace"
+```
+
+#### Where to Find Your Results
+
+After running a segmentation task:
+
+1. **Segmentation outputs**: Check `output_images/{timestamp}/`
+2. **Agent reasoning log**: Open `output_images/{timestamp}/agent_trace.txt`
+3. **Quality summary**: Read `output_images/{timestamp}/summary.txt`
+4. **Memory/knowledge base**: View `output/memory/knowledge_base.json` to see what the agent has learned
+
+**Note:** The application automatically creates these directories if they don't exist, so no manual setup is required.
+
+### ⚠️ Troubleshooting
+
+If you encounter configuration errors on startup:
+
+1. **"No such file or directory: './config/config.yml'"**
+   - Make sure you created the `config/config.yml` file in the project root directory
+   - Verify the file path: `/path/to/GenCELLAgent/config/config.yml`
+   - See the "API & Credentials Configuration" section above for the template
+
+2. **"Failed to load the configuration file"**
+   - Check that your `config.yml` has proper YAML syntax
+   - Ensure all required fields are filled: `project_id`, `region`, `credentials_json`, `model_name`
+   - Use absolute paths for `credentials_json`, not relative paths
+
+3. **Authentication errors with Vertex AI**
+   - Verify your service account JSON file path is correct
+   - Ensure the Vertex AI API is enabled in your Google Cloud project
+   - Check that your service account has "Vertex AI User" role assigned
 
 ## 🔧 Developer Guide: Add a New Tool
 
@@ -144,8 +250,8 @@ Put env-specific execution in a small runner script, not in `GUI_demo.py`.
 
 Example files:
 
-- [cell_segmentation_env_runner.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/tools/cell_segmentation_env_runner.py)
-- [cell_segmentation_models.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/tools/cell_segmentation_models.py)
+- [cell_segmentation_env_runner.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/tools/cell_segmentation_env_runner.py)
+- [cell_segmentation_models.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/tools/cell_segmentation_models.py)
 
 The wrapper calls the env Python with `subprocess.run(...)` and returns standard output paths.
 
@@ -164,7 +270,7 @@ return f"Cellpose segmentation completed successfully in segment_save_path:{over
 
 ### 4. Add the tool to `GUI_demo.py`
 
-In [GUI_demo.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/GUI_demo.py):
+In [GUI_demo.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/GUI_demo.py):
 
 1. Import the wrapper.
 2. Add a new enum name in `Name`.

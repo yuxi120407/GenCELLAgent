@@ -928,7 +928,7 @@ else:
                                 os.remove(p)
                         command = [
                             "streamlit", "run",
-                            "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/tools/sam_correction_tool_micro_sam_time.py",
+                            "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/tools/sam_correction_tool_micro_sam_time.py",
                             "--",
                             f"--image_path={last_image}",
                             f"--mask_path={last_mask}",

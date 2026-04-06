@@ -1,0 +1,20 @@
+# GenCELLAgent Configuration File Example
+# Copy this file to config.yml and fill in your actual values
+
+# Your Google Cloud Project ID
+# Find this on your GCP dashboard homepage
+project_id: "your-gcp-project-id"
+
+# Google Cloud region (e.g., us-central1, us-east1, europe-west1)
+region: "us-central1"
+
+# Path to your Google Cloud service account JSON credentials file
+# IMPORTANT: Use absolute path, not relative path
+credentials_json: ""
+
+# Gemini model name to use
+# Available options:
+#   - gemini-3-flash-preview (faster, good for most tasks)
+#   - gemini-3-pro-preview (more capable, slower)
+#   - gemini-2.5-flash (latest fast model)
+model_name: "gemini-2.5-flash"

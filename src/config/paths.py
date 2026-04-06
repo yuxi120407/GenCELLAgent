@@ -1,5 +1,9 @@
 import os
 
+# Base workspace folder - contains your conda/python environments
+# Default is the persistent storage location
+BASE_WORKSPACE = "/home/idies/workspace/Storage/xyu1/persistent"
+
 # Root of the cloned repository (two levels up from src/config/paths.py)
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

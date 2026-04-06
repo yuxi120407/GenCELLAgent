@@ -7,8 +7,9 @@ from PIL import Image
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Import organelle-specific feedback prompts from SAM3 prompts library
-sys.path.insert(0, "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/sam3/test_gemini_sam3")
+# Import organelle-specific feedback prompts from Prompts library
+from src.config.paths import REPO_ROOT
+sys.path.insert(0, os.path.join(REPO_ROOT, "Scenario_Automatic"))
 from Prompts.Gemini_prompts_new import ER_FEEDBACK, MITO_FEEDBACK, GOLGI_FEEDBACK
 
 load_dotenv()

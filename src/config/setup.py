@@ -14,8 +14,8 @@ class Config:
             # The following line ensures that the __init__ method is only called once.
             cls._instance.__initialized = False
         return cls._instance
-    
-    def __init__(self, config_path: str = "./config/config.yml"):
+
+    def __init__(self, config_path: str = None):
         """
         Initialize the Config class.
 
@@ -25,13 +25,29 @@ class Config:
         if self.__initialized:
             return
         self.__initialized = True
-        
+
+        # Use absolute path based on this file's location
+        if config_path is None:
+            repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            config_path = os.path.join(repo_root, "config", "config.yml")
+
         self.__config = self._load_config(config_path)
-        self.PROJECT_ID = self.__config['project_id']
-        self.REGION = self.__config['region']
-        self.CREDENTIALS_PATH = self.__config['credentials_json']
-        self._set_google_credentials(self.CREDENTIALS_PATH)
-        self.MODEL_NAME = self.__config['model_name']
+        if self.__config is None:
+            # Use default values if config file is missing
+            logger.warning("Using default configuration values")
+            self.__config = {
+                'project_id': os.getenv('GOOGLE_PROJECT_ID', 'your-project-id'),
+                'region': os.getenv('GOOGLE_REGION', 'us-central1'),
+                'credentials_json': os.getenv('GOOGLE_APPLICATION_CREDENTIALS', ''),
+                'model_name': os.getenv('MODEL_NAME', 'gemini-3-flash-preview')
+            }
+
+        self.PROJECT_ID = self.__config.get('project_id', 'your-project-id')
+        self.REGION = self.__config.get('region', 'us-central1')
+        self.CREDENTIALS_PATH = self.__config.get('credentials_json', '')
+        if self.CREDENTIALS_PATH:
+            self._set_google_credentials(self.CREDENTIALS_PATH)
+        self.MODEL_NAME = self.__config.get('model_name', 'gemini-3-flash-preview')
 
     @staticmethod
     def _load_config(config_path: str) -> Dict[str, Any]:

@@ -5,10 +5,9 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-
-BASE_WORKSPACE = "/home/idies/workspace/Storage/xyu1/persistent"
+from src.config.paths import BASE_WORKSPACE
 SCENARIO_MODEL_SELECTION_DIR = os.path.join(
-    BASE_WORKSPACE, "GenCELLAgent_new", "Scenario_Model_selection"
+    BASE_WORKSPACE, "GenCELLAgent", "Scenario_Model_selection"
 )
 
 if SCENARIO_MODEL_SELECTION_DIR not in sys.path:

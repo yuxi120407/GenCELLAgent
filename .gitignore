@@ -6,4 +6,11 @@
 # Python cache
 __pycache__/
 *.py[cod]
+
+# Environment and credentials
 .env
+config/config.yml
+config/config.yaml
+src/credentials/*.json
+*service-account*.json
+*credentials*.json

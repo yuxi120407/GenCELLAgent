@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-SAM3_CHECKPOINT = "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/sam3/checkpoints/sam3/sam3.pt"
+SAM3_CHECKPOINT = "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/sam3/checkpoints/sam3/sam3.pt"
 
 # ============================================================================
 # GEMINI PROMPT GENERATION
@@ -1407,7 +1407,7 @@ def parse_args():
                        default='./test_refinement_all_images',
                        help='Output directory for results')
     parser.add_argument('--sam3_checkpoint', type=str,
-                       default='/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/sam3/checkpoints/sam3/sam3.pt',
+                       default='/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/sam3/checkpoints/sam3/sam3.pt',
                        help='Path to SAM3 checkpoint')
     
     # Model settings

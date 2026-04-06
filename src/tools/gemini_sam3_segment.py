@@ -14,7 +14,7 @@ from sam3.model.sam3_image_processor import Sam3Processor
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-SAM3_CHECKPOINT = "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/sam3/checkpoints/sam3/sam3.pt"
+SAM3_CHECKPOINT = "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/sam3/checkpoints/sam3/sam3.pt"
 GEMINI_MODEL = "gemini-3-flash-preview"
 
 BBX_PROMPT_TEMPLATE = """You are a cell biology expert analyzing microscopy images.
@@ -107,7 +107,7 @@ def gemini_sam3_segment(
         save_path      = os.path.join(save_dir, f"{name}_segmentation_v{retry_count}{ext}")
         mask_save_path = os.path.join(save_dir, f"{name}_segmentation_v{retry_count}_mask.png")
     else:
-        fallback_dir = "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/output/segment_results"
+        fallback_dir = "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/output/segment_results"
         os.makedirs(fallback_dir, exist_ok=True)
         ts             = int(time.time())
         save_path      = f"{fallback_dir}/results_{ts}.png"

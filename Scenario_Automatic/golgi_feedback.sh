@@ -3,7 +3,7 @@
 # Configuration
 IMAGE_DIR="/home/idies/workspace/Storage/xyu1/persistent/Langchain/ours_test/test_images/golgi/images" 
 OUTPUT_DIR="./sam3_results_all_golgi_seggpt"
-CHECKPOINT="/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent_new/src/sam3/checkpoints/sam3/sam3.pt"
+CHECKPOINT="/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/sam3/checkpoints/sam3/sam3.pt"
 GEMINI_MODEL="gemini-3-flash-preview"  #gemini-3-pro-preview
 ANALYSIS_DIR="./analysis_all_golgi_seggpt"
 QUALITY_THRESHOLD=0.85
