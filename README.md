@@ -109,14 +109,9 @@ The core "brain" of the agent uses Google Cloud Vertex AI. To authenticate, you 
       credentials_json: "/absolute/path/to/your/service-account-key.json"
 
       # Gemini model name to use
-      # Options: gemini-3-flash-preview, gemini-3-pro-preview, gemini-2.5-flash, etc.
-      model_name: "gemini-3-flash-preview"
+      # Options: gemini-3-flash-preview, gemini-2.5-flash, etc.
+      model_name: "gemini-2.5-flash"
       ```
-    - **Note:** If `config/config.yml` is not found, the system will fall back to environment variables:
-      - `GOOGLE_PROJECT_ID`
-      - `GOOGLE_REGION`
-      - `GOOGLE_APPLICATION_CREDENTIALS`
-      - `MODEL_NAME`
 
 #### 2. .env File Setup (Tools)
 For specialized tools (Search, Evaluation, etc.), create a `.env` file in the root of the project:
@@ -142,67 +137,6 @@ Launch the Streamlit interface:
 ```bash
 streamlit run GUI_demo.py
 ```
-
-### 📁 Understanding Project Paths and Outputs
-
-GenCELLAgent uses a centralized path configuration system defined in `src/config/paths.py`. This section explains where your data is stored and what each directory is used for.
-
-#### Path Configuration (`src/config/paths.py`)
-
-| Path Variable | Default Location | Purpose |
-|--------------|------------------|---------|
-| **`BASE_WORKSPACE`** | `/home/idies/workspace/Storage/xyu1/persistent` | Base folder containing your conda/Python environments. **Modify this** to match your system's workspace location. |
-| **`REPO_ROOT`** | Auto-detected | Root directory of the GenCELLAgent repository (where you cloned the project). |
-| **`OUTPUT_IMAGES_DIR`** | `{REPO_ROOT}/output_images/` | **Main output directory** - All segmentation results are saved here, organized by timestamp. Each run creates a subfolder like `20260406_150000/`. |
-| **`IMG_EXAMPLE_DIR`** | `{REPO_ROOT}/examples/` | Storage for uploaded input images used in the GUI demo. |
-| **`KNOWLEDGE_BASE_PATH`** | `{REPO_ROOT}/output/memory/knowledge_base.json` | **Agent memory** - Stores learned patterns, successful strategies, and historical context for future sessions. |
-| **`PROMPT_TEMPLATE_PATH`** | `{REPO_ROOT}/prompt/react.txt` | Main ReAct (Reasoning + Acting) prompt template for the agent loop. |
-| **`PLANNING_PROMPT_TEMPLATE_PATH`** | `{REPO_ROOT}/prompt/planning.txt` | Planning phase prompt template - helps the agent decide which tools to use. |
-| **`SUMMARIZER_PROMPT_TEMPLATE_PATH`** | `{REPO_ROOT}/prompt/summarizer_hitl_recommendation.txt` | Human-in-the-loop (HITL) summarization prompt for generating recommendations. |
-
-#### Output Directory Structure
-
-When you run a segmentation task, GenCELLAgent creates a timestamped folder in `output_images/`:
-
-```
-output_images/
-└── 20260406_150000/              # Timestamp: YYYYMMDD_HHMMSS
-    ├── agent_trace.txt            # Complete log of agent reasoning and actions
-    ├── summary.txt                # Final HITL summary and recommendations
-    ├── next_hitl_level.json       # Recommended human-in-the-loop mode for next run
-    ├── your_image_segmentation_v1.png       # Segmentation overlay (original + mask)
-    ├── your_image_segmentation_v1_mask.png  # Binary segmentation mask
-    ├── your_image_iter2.png       # Intermediate results from iteration 2
-    ├── your_image_iter2_mask.png  # Intermediate masks
-    └── human_correction_iter3.png # Results after human correction (if used)
-```
-
-#### Customizing Paths
-
-To change the default paths (e.g., if you're not using the IDIES system):
-
-1. Open `src/config/paths.py`
-2. Modify `BASE_WORKSPACE` to your local workspace:
-   ```python
-   BASE_WORKSPACE = "/your/custom/workspace/path"
-   ```
-3. All other paths are relative to `REPO_ROOT` and will adjust automatically
-
-**Example for local development:**
-```python
-BASE_WORKSPACE = "/home/username/projects/workspace"
-```
-
-#### Where to Find Your Results
-
-After running a segmentation task:
-
-1. **Segmentation outputs**: Check `output_images/{timestamp}/`
-2. **Agent reasoning log**: Open `output_images/{timestamp}/agent_trace.txt`
-3. **Quality summary**: Read `output_images/{timestamp}/summary.txt`
-4. **Memory/knowledge base**: View `output/memory/knowledge_base.json` to see what the agent has learned
-
-**Note:** The application automatically creates these directories if they don't exist, so no manual setup is required.
 
 ### ⚠️ Troubleshooting
 
