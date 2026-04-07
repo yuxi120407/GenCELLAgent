@@ -168,7 +168,7 @@ The **Auto Organelle Segmentation** mode enables training-free segmentation of o
      ```
 
 6. **Run Segmentation:**
-   - Click **"Run Agent"**
+   - Click **"Send"**
 
 ### ⚠️ Troubleshooting
 
