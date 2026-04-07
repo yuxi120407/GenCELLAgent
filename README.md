@@ -184,8 +184,8 @@ Put env-specific execution in a small runner script, not in `GUI_demo.py`.
 
 Example files:
 
-- [cell_segmentation_env_runner.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/tools/cell_segmentation_env_runner.py)
-- [cell_segmentation_models.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/tools/cell_segmentation_models.py)
+- [cell_segmentation_env_runner.py](/src/tools/cell_segmentation_env_runner.py)
+- [cell_segmentation_models.py](/src/tools/cell_segmentation_models.py)
 
 The wrapper calls the env Python with `subprocess.run(...)` and returns standard output paths.
 
