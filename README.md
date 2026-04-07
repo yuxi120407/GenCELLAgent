@@ -138,6 +138,38 @@ Launch the Streamlit interface:
 streamlit run GUI_demo.py
 ```
 
+### Example: Golgi Segmentation in Auto Mode
+
+The **Auto Organelle Segmentation** mode enables training-free segmentation of organelles like ER, Golgi iterative refinement. Here's how to segment Golgi apparatus:
+
+1. **Launch the GUI:**
+   ```bash
+   streamlit run GUI_demo.py
+   ```
+
+2. **Upload your image:**
+   - Click "Browse files" to upload your electron microscopy image containing Golgi structures
+   - Supported formats: PNG, JPG, JPEG, TIF, TIFF
+   - Example images are available in `data/golgi/images/` (e.g., `image_9.png`, `image_15.png`)
+
+3. **Select Auto Mode:**
+   - Choose **"🪄 Auto Organelle Segmentation (ER, Golgi, Mito) - Uses General Text Guided Segmentation"**
+   - This mode automatically uses text-guided segmentation with iterative refinement
+
+4. **Configure Settings (Sidebar):**
+   - **Max Segmentation Retries:** Set to 2
+     - Higher values allow more refinement iterations for better quality
+     - The agent will iteratively improve segmentation based on VLM feedback
+
+5. **Provide Task Description:**
+   - In the text box, describe your segmentation goal, for example:
+     ```
+     Help me segment the Golgi in the given image
+     ```
+
+6. **Run Segmentation:**
+   - Click **"Run Agent"**
+
 ### ⚠️ Troubleshooting
 
 If you encounter configuration errors on startup:
