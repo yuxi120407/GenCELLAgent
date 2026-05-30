@@ -37,7 +37,8 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
 ## 🚀 Getting Started
 
 ### Installation
-
+   This requires Python 3.12 or higher, PyTorch 2.7 or higher, and a CUDA-compatible GPU with CUDA 12.6 or higher.
+   
 1. Clone the repository:
    ```bash
    git clone https://github.com/yuxi120407/GenCELLAgent.git
@@ -49,16 +50,19 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
    conda env create -f environment_new.yml
    conda activate gencell
    ```
-
-   This installs Python 3.12, PyTorch 2.7.0 (CUDA 12.6), Cellpose, micro-SAM, CellSAM, and all required dependencies in a single environment.
-
-3. Install SAM3 and additional packages:
+3. Install miro-sam
    ```bash
-   cd src/sam3 && pip install -e ".[notebooks,train,dev]" && cd ../..
-   pip install google-genai setuptools
+    conda install -c conda-forge micro_sam
    ```
 
-   > **Note:** All model weights (VGG, Cellpose, micro-SAM, CellSAM, SAM3, SegGPT) are included in the repository under `models/` and `src/`. No additional downloads required.
+4. Clone and install SAM3:
+   ```bash
+   git clone https://github.com/facebookresearch/sam3.git src/sam3
+   cd src/sam3 && pip install -e ".[notebooks,train,dev]" && cd ../..
+   pip install "tifffile<2025"
+   ```
+
+   > **Note:** All model weights (VGG, Cellpose, micro-SAM, CellSAM, SAM3, SegGPT) can be downloaded from [models/README.md](models/README.md).
 
 ### API Key Setup
 
@@ -91,14 +95,14 @@ The system uses VGG style similarity to automatically select the best tool (Cell
 
 ```bash
 # Auto-selects the best tool based on image style
-python batch_segment_new.py --image examples/cells/A172_Phase_A7_2_01d00h00m_4.tif --prompt "Help me segment all the cells in the provided image"
+python batch_segment.py --image examples/cells/A172_Phase_A7_2_01d00h00m_4.tif --prompt "Help me segment all the cells in the provided image"
 
 # Different image types auto-route to different tools:
-python batch_segment_new.py --image examples/yeast/im051.tif --prompt "segment all cells"
-python batch_segment_new.py --image examples/plantseg/plantseg_root_val_Movie1_t00004_crop_gt_00013.tif --prompt "segment all cells"
+python batch_segment.py --image examples/yeast/im051.tif --prompt "segment all cells"
+python batch_segment.py --image examples/plantseg/plantseg_root_val_Movie1_t00004_crop_gt_00013.tif --prompt "segment all cells"
 
 # Force a specific tool if needed:
-python batch_segment_new.py --image examples/yeast/im051.tif --prompt "segment cells" --tool cellsam
+python batch_segment.py --image examples/yeast/im051.tif --prompt "segment cells" --tool cellsam
 ```
 
 ### Organelle Mode — Gemini + SAM3 with Iterative Feedback
@@ -106,9 +110,9 @@ python batch_segment_new.py --image examples/yeast/im051.tif --prompt "segment c
 For sub-cellular structures, Gemini generates segmentation prompts and iteratively refines results:
 
 ```bash
-python batch_segment_new.py --image examples/golgi/images/sample_0000.png --prompt "segment the golgi" --max_iterations 3
-python batch_segment_new.py --image examples/mito/images/image_023FCj.png --prompt "find mitochondria" --max_iterations 3
-python batch_segment_new.py --image examples/er/images/image_1.png --prompt "segment ER" --max_iterations 3
+python batch_segment.py --image examples/golgi/images/sample_0000.png --prompt "segment the golgi" --max_iterations 3
+python batch_segment.py --image examples/mito/images/image_023FCj.png --prompt "find mitochondria" --max_iterations 3
+python batch_segment.py --image examples/er/images/image_1.png --prompt "segment ER" --max_iterations 3
 ```
 
 ### Reference Mode — SegGPT One-Shot Segmentation
@@ -116,7 +120,7 @@ python batch_segment_new.py --image examples/er/images/image_1.png --prompt "seg
 Provide a reference image-mask pair to segment similar structures in new images:
 
 ```bash
-python batch_segment_new.py --image examples/er/images/image_101.png --prompt "segment using reference" --reference_image examples/er/images/image_1.png --reference_mask examples/er/labels/label_1.png
+python batch_segment.py --image examples/er/images/image_101.png --prompt "segment using reference" --reference_image examples/er/images/image_1.png --reference_mask examples/er/labels/label_1.png
 ```
 
 ### Batch Processing
@@ -124,14 +128,14 @@ python batch_segment_new.py --image examples/er/images/image_101.png --prompt "s
 Process all images in a directory:
 
 ```bash
-python batch_segment_new.py --image_dir examples/cells/ --prompt "segment all cells"
-python batch_segment_new.py --image_dir examples/golgi/images/ --prompt "segment golgi" --max_iterations 5
+python batch_segment.py --image_dir examples/cells/ --prompt "segment all cells"
+python batch_segment.py --image_dir examples/golgi/images/ --prompt "segment golgi" --max_iterations 5
 ```
 
 ### Python API
 
 ```python
-from batch_segment_new import segment, batch_segment
+from batch_segment import segment, batch_segment
 
 # Auto mode detection + tool selection
 result = segment("image.tif", prompt="Help me segment all cells")
