@@ -66,7 +66,7 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
 
 ### API Key Setup
 
-GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organelle segmentation, and evaluation. Only **two API keys** are needed:
+GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organelle segmentation, and evaluation. Only **two API keys** are needed: [[API Key Setup Tutorial](https://youtu.be/l1jxXL--Pl0?si=BJWJEmEFU3Yf-ExL)]  
 
 1. **Get a Google API Key:**
    - Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
@@ -81,7 +81,7 @@ GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organell
    SERPAPI_API_KEY=your_serpapi_key_here
    ```
 
-That's it! No Google Cloud project, no Vertex AI, no service account JSON needed.[[API Key Setup Tutorial](https://youtu.be/l1jxXL--Pl0?si=BJWJEmEFU3Yf-ExL)  
+That's it! No Google Cloud project, no Vertex AI, no service account JSON needed.
 
 ---
 
