@@ -9,17 +9,20 @@ from typing import Any
 import requests
 import json
 import os
-import google.generativeai as genai
+from google import genai
 import re
 from dotenv import load_dotenv
 
 load_dotenv()
 
+from src.config.setup import config
+
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 if GOOGLE_API_KEY:
-    genai.configure(api_key=GOOGLE_API_KEY)
+    client = genai.Client(api_key=GOOGLE_API_KEY)
 else:
+    client = None
     logger.error("GOOGLE_API_KEY environment variable is not set in .env.")
 
 class SerpAPIClient:
@@ -106,7 +109,6 @@ def summarize_with_gemini(top_results: List[Dict[str, Any]], api_key: str) -> st
     Use Gemini to summarize the top search results.
     """
 
-    model = genai.GenerativeModel('gemini-2.5-flash')
 
     content = "\n".join(
         f"{i+1}. {r['title']}\n{r['snippet']}" for i, r in enumerate(top_results) if r.get("snippet")
@@ -127,7 +129,7 @@ def summarize_with_gemini(top_results: List[Dict[str, Any]], api_key: str) -> st
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(model=config.MODEL_SEARCH, contents=prompt)
         
         # Handle cases where response might be empty or blocked by safety settings
         if not response or not response.parts:

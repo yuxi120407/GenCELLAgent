@@ -2,13 +2,20 @@ import argparse
 import json
 import os
 import sys
+import matplotlib
+matplotlib.use('Agg')
+os.environ['QT_QPA_PLATFORM'] = 'offscreen'
+from unittest.mock import MagicMock
+sys.modules['napari'] = MagicMock()
+sys.modules['napari.utils'] = MagicMock()
+
 from pathlib import Path
 from typing import Optional
 
-from src.config.paths import BASE_WORKSPACE
-SCENARIO_MODEL_SELECTION_DIR = os.path.join(
-    BASE_WORKSPACE, "GenCELLAgent", "Scenario_Model_selection"
-)
+REPO_ROOT = str(Path(__file__).resolve().parent.parent.parent)
+sys.path.insert(0, REPO_ROOT)
+
+SCENARIO_MODEL_SELECTION_DIR = os.path.join(REPO_ROOT, "Scenario_Model_selection")
 
 if SCENARIO_MODEL_SELECTION_DIR not in sys.path:
     sys.path.insert(0, SCENARIO_MODEL_SELECTION_DIR)
@@ -81,19 +88,22 @@ def save_overlay_and_mask(image_path: str, raw_mask_path: str, save_dir: str, su
 
 
 def run_tool(args):
-    os.makedirs(args.save_dir, exist_ok=True)
+    # Create per-image subfolder
+    stem = Path(args.image_path).stem
+    image_dir = os.path.join(args.save_dir, stem)
+    os.makedirs(image_dir, exist_ok=True)
 
     if args.tool == "cellpose":
         from util_cellpose import run_cellpose_segmentation_single
 
         prediction_folder = run_cellpose_segmentation_single(
             path=args.image_path,
-            experiment_root=args.save_dir,
+            experiment_root=image_dir,
             model_type=args.model_type,
         )
         raw_mask_path = os.path.join(prediction_folder, os.path.basename(args.image_path))
         overlay_path, mask_path = save_overlay_and_mask(
-            args.image_path, raw_mask_path, args.save_dir, "cellpose"
+            args.image_path, raw_mask_path, image_dir, "cellpose"
         )
 
     elif args.tool == "cellsam":
@@ -101,13 +111,13 @@ def run_tool(args):
 
         raw_mask_path = run_cellsam_segmentation_single(
             path=args.image_path,
-            experiment_root=args.save_dir,
+            experiment_root=image_dir,
             python_path=sys.executable,
             bbox_threshold=args.bbox_threshold,
             device=args.device,
         )
         overlay_path, mask_path = save_overlay_and_mask(
-            args.image_path, raw_mask_path, args.save_dir, "cellsam"
+            args.image_path, raw_mask_path, image_dir, "cellsam"
         )
 
     elif args.tool == "micro_sam":
@@ -120,12 +130,12 @@ def run_tool(args):
         prediction_folder = run_automatic_instance_segmentation(
             image_path=args.image_path,
             dataset_name=dataset_name,
-            experiment_root=args.save_dir,
+            experiment_root=image_dir,
             model_type=args.model_type,
         )
         raw_mask_path = os.path.join(prediction_folder, os.path.basename(args.image_path))
         overlay_path, mask_path = save_overlay_and_mask(
-            args.image_path, raw_mask_path, args.save_dir, "micro_sam"
+            args.image_path, raw_mask_path, image_dir, "micro_sam"
         )
 
     else:

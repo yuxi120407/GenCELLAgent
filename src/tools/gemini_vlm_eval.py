@@ -4,7 +4,7 @@ import json
 import re
 import numpy as np
 from PIL import Image
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 # Import organelle-specific feedback prompts from Prompts library
@@ -14,8 +14,10 @@ from Prompts.Gemini_prompts_new import ER_FEEDBACK, MITO_FEEDBACK, GOLGI_FEEDBAC
 
 load_dotenv()
 
+from src.config.setup import config
+
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GEMINI_MODEL = "gemini-3-flash-preview"
+GEMINI_MODEL = config.MODEL_VLM_EVAL
 
 # Fallback generic prompt if organelle is not recognised
 GENERIC_FEEDBACK = """You are an expert cell biologist evaluating a cell segmentation result.
@@ -127,8 +129,7 @@ def gemini_vlm_eval(
     Returns:
         JSON string with keys: evaluation, overall_score (0-100), refined_segmentation_prompt.
     """
-    genai.configure(api_key=GOOGLE_API_KEY)
-    gemini = genai.GenerativeModel(GEMINI_MODEL)
+    client = genai.Client(api_key=GOOGLE_API_KEY)
 
     # ── Step 1: Build comparison image ──────────────────────────────────────
     comparison = _create_comparison_image(image_path, mask_path)
@@ -140,9 +141,9 @@ def gemini_vlm_eval(
 
     # ── Step 3: Evaluate segmentation ───────────────────────────────────────
     print(f"[gemini_vlm_eval] Calling Gemini ({GEMINI_MODEL}) for evaluation...")
-    eval_response = gemini.generate_content(
-        [feedback_prompt, comparison],
-        generation_config={"temperature": 0.2},
+    eval_response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=[feedback_prompt, comparison],
     )
 
     try:
@@ -152,7 +153,6 @@ def gemini_vlm_eval(
 
     quality_score   = eval_json.get("quality_score", 0.0)
     visual_guidance = eval_json.get("visual_guidance", "")
-    # SummaryOfReasons is only in GENERIC_FEEDBACK; organelle prompts use visual_guidance instead
     summary         = eval_json.get("SummaryOfReasons") or visual_guidance or eval_response.text.strip()
 
     print(f"  Quality score: {quality_score:.3f} ({round(quality_score * 100, 1)}/100)")
@@ -164,7 +164,7 @@ def gemini_vlm_eval(
         summary=summary,
         visual_guidance=visual_guidance,
     )
-    refine_response = gemini.generate_content(refine_input)
+    refine_response = client.models.generate_content(model=GEMINI_MODEL, contents=refine_input)
     refined_prompt  = refine_response.text.strip()
 
     # ── Step 4: Always save comparison image (UI needs the path) ────────────

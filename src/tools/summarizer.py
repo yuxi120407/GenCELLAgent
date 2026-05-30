@@ -1,14 +1,16 @@
 import subprocess
 from src.config.logging import logger
-import google.generativeai as genai
+from google import genai
 from pathlib import Path
 import os
 from PIL import Image
 import json
 
 
+from src.config.setup import config
+
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
+client = genai.Client(api_key=GOOGLE_API_KEY)
 
 def Prompt_generated(process_text: str) -> str:
     """
@@ -58,9 +60,8 @@ def summarizer_report(save_dir: str, process_text: str) -> str:
         str: The generated report text or an error message in case of failure.
     """
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
         prompt = Prompt_generated(process_text)
-        response = model.generate_content([prompt])
+        response = client.models.generate_content(model=config.MODEL_SUMMARIZER, contents=[prompt])
         
         # Save to file
         output_path = save_dir +"/summarized_report.txt"

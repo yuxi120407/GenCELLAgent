@@ -1,5 +1,8 @@
-import streamlit as st
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
+import streamlit as st
 import time
 import json
 import asyncio
@@ -12,9 +15,7 @@ import cv2
 import aiofiles
 from PIL import Image
 
-import vertexai
-from vertexai.generative_models import GenerativeModel, Part
-import google.generativeai as genai
+from google import genai
 
 from pydantic import BaseModel, Field
 from typing import Callable, Union, List, Dict, Any, Optional
@@ -27,10 +28,10 @@ from src.tools.serp_new import search as google_search_summary
 from src.tools.gemini_sam3_segment import gemini_sam3_segment
 from src.tools.gemini_vlm_eval import gemini_vlm_eval
 from src.tools.oneshot_segGPT import seggpt_inference_img
-from src.tools.cell_segmentation_models import (
-    cellpose_segment,
-    cellsam_segment,
-    micro_sam_segment,
+from batch_segment_new import (
+    cellpose_segment_direct as cellpose_segment,
+    cellsam_segment_direct as cellsam_segment,
+    micro_sam_segment_direct as micro_sam_segment,
 )
 
 from src.tools.mitonet import mitonet_inference
@@ -56,11 +57,8 @@ from src.config.paths import (
 from src.config.setup import config
 from src.llm.gemini import generate
 
-# Initialize Vertex AI
-vertexai.init(
-    project=config.PROJECT_ID,
-    location=config.REGION
-)
+# Initialize Google AI API
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 
 Observation = Union[str, Exception]
 
@@ -352,7 +350,7 @@ def render_trace_ui():
 # --- Agent Implementation ---
 
 class Agent:
-    def __init__(self, model: GenerativeModel, trace_path: str, callback=None) -> None:
+    def __init__(self, model, trace_path: str, callback=None) -> None:
         self.model = model
         self.trace_path = trace_path
         self.tools: Dict[Name, Tool] = {}
@@ -662,7 +660,7 @@ class Agent:
         return await asyncio.to_thread(self.ask_gemini, prompt)
 
     def ask_gemini(self, prompt: str) -> str:
-        contents = [Part.from_text(prompt)]
+        contents = [prompt]
         response = generate(self.model, contents)
         return str(response) if response is not None else "No response from Gemini"
 
@@ -831,7 +829,7 @@ if st.session_state.temp_path is None or not user_query:
     st.warning("Please upload a main image and enter a query before running the agent.")
 else:
     if "agent" not in st.session_state:
-        gemini = GenerativeModel(config.MODEL_NAME)
+        gemini = config.MODEL_AGENT
         trace_path = os.path.join(st.session_state.timestamp_folder, "agent_trace.txt")
         st.session_state.agent = Agent(model=gemini, trace_path=trace_path, callback=lambda x: st.session_state.events.append(x))
         st.session_state.agent.register(Name.GOOGLE, google_search_summary)
@@ -928,7 +926,7 @@ else:
                                 os.remove(p)
                         command = [
                             "streamlit", "run",
-                            "/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/src/tools/sam_correction_tool_micro_sam_time.py",
+                            os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "tools", "sam_correction_tool_micro_sam_time.py"),
                             "--",
                             f"--image_path={last_image}",
                             f"--mask_path={last_mask}",

@@ -31,9 +31,11 @@ def launch_sam_correction_tool(image_path: str, mask_path: str, save_path: Optio
         if os.path.exists(result_info_path):
             os.remove(result_info_path)
         
+        _repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        correction_script = os.path.join(_repo_root, "src", "tools", "sam_correction_tool_micro_sam.py")
         command = [
             "streamlit", "run",
-            "/home/idies/workspace/Storage/xyu1/persistent/Langchain/ours_test/src/tools/sam_correction_tool_micro_sam.py",
+            correction_script,
             "--", f"--image_path={image_path}", f"--mask_path={mask_path}", f"--save_path={save_path}"
         ]
         subprocess.Popen(command)

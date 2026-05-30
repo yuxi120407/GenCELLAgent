@@ -3,10 +3,12 @@ import os
 import subprocess
 from typing import Optional
 
+from pathlib import Path
+
+_REPO_ROOT = str(Path(__file__).resolve().parent.parent.parent)
+RUNNER_PATH = os.path.join(_REPO_ROOT, "src", "tools", "cell_segmentation_env_runner.py")
+
 from src.config.paths import BASE_WORKSPACE
-RUNNER_PATH = os.path.join(
-    BASE_WORKSPACE, "GenCELLAgent", "src", "tools", "cell_segmentation_env_runner.py"
-)
 MICRO_SAM_PYTHON = os.path.join(
     BASE_WORKSPACE, "pytorch_env", "micro-sam", "bin", "python"
 )
@@ -19,7 +21,7 @@ CELLSAM_PYTHON = os.path.join(
 def _resolve_save_dir(save_directory: Optional[str] = None, save_dir: Optional[str] = None) -> str:
     out_dir = save_directory or save_dir
     if not out_dir:
-        out_dir = os.path.join(BASE_WORKSPACE, "GenCELLAgent", "output", "cell_segmentation_models")
+        out_dir = os.path.join(_REPO_ROOT, "output", "cell_segmentation_models")
     os.makedirs(out_dir, exist_ok=True)
     return out_dir
 
@@ -27,10 +29,11 @@ def _resolve_save_dir(save_directory: Optional[str] = None, save_dir: Optional[s
 def _run_env_tool(python_path: str, args: list[str]) -> dict:
     result = subprocess.run(
         [python_path, RUNNER_PATH, *args],
-        check=True,
         capture_output=True,
         text=True,
     )
+    if result.returncode != 0:
+        raise RuntimeError(f"Tool runner failed:\n  stderr: {result.stderr}\n  stdout: {result.stdout}")
     stdout = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     if not stdout:
         raise RuntimeError(f"No output returned from tool runner. stderr: {result.stderr}")

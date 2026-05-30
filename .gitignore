@@ -14,3 +14,17 @@ config/config.yaml
 src/credentials/*.json
 *service-account*.json
 *credentials*.json
+
+# Model weights (too large for git, download separately)
+models/vgg/*.pth
+models/cellpose/*
+models/cellsam/*
+models/micro_sam/*
+src/SegGPT/seggpt_vit_large.pth
+src/sam3/checkpoints/sam3/sam3.pt
+src/sam3/checkpoints/sam3/model.safetensors
+
+# Output
+output/
+output_images/
+logs/

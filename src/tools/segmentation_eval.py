@@ -1,15 +1,17 @@
 import subprocess
 from src.config.logging import logger
-import google.generativeai as genai
+from google import genai
 from pathlib import Path
 import os
 from PIL import Image
 import json
 from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv())  # auto-detects nearest .env
+from src.config.setup import config
+
+load_dotenv(find_dotenv())
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
+client = genai.Client(api_key=GOOGLE_API_KEY)
 
 # def Prompt_generated(visual_characteristics):
 #     """
@@ -265,7 +267,7 @@ def segmentation_evaluator(image_path: str, segmentation_prompt: str, evaluation
 
 
         # Initialize Gemini
-        model = genai.GenerativeModel('gemini-2.5-flash-preview-05-20')
+        model_name = config.MODEL_SEG_EVAL
         
         # Step 1: Generate or load evaluation prompt
         eval_path = Path(evaluation_prompt_path)
@@ -278,9 +280,9 @@ def segmentation_evaluator(image_path: str, segmentation_prompt: str, evaluation
 
 
         # Step 3: Evaluate segmentation
-        evaluation_response = model.generate_content(
-            [evaluation_prompt, example_image_1, example_image_2, image],
-             generation_config={"temperature": 0.2,})
+        evaluation_response = client.models.generate_content(
+            model=model_name,
+            contents=[evaluation_prompt, example_image_1, example_image_2, image])
         
 
         evaluation_text = evaluation_response.text.strip()
@@ -317,7 +319,7 @@ def segmentation_evaluator(image_path: str, segmentation_prompt: str, evaluation
 
         #generate a refine prompt based on summary
         refinement_instruction = refine_segmentation_prompt(segmentation_prompt, summary)
-        refined_response = model.generate_content(refinement_instruction)
+        refined_response = client.models.generate_content(model=model_name, contents=refinement_instruction)
         refined_prompt = refined_response.text.strip()
 
         return json.dumps({

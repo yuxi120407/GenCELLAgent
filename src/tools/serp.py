@@ -8,13 +8,13 @@ from typing import Any
 import requests
 import json
 import os
-import google.generativeai as genai
+from google import genai
 import re
-# Static paths
-CREDENTIALS_PATH = './credentials/key.yml'
+
+from src.config.setup import config
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
+client = genai.Client(api_key=GOOGLE_API_KEY)
 
 SEARCH_API_KEY = os.getenv("SEARCH_API_KEY")
 
@@ -124,7 +124,6 @@ def summarize_with_gemini(top_results: List[Dict[str, Any]], api_key: str) -> st
     Use Gemini to summarize the top search results.
     """
 
-    model = genai.GenerativeModel('gemini-2.0-flash-exp')
 
     content = "\n".join(
         f"{i+1}. {r['title']}\n{r['snippet']}" for i, r in enumerate(top_results) if r.get("snippet")
@@ -144,7 +143,7 @@ def summarize_with_gemini(top_results: List[Dict[str, Any]], api_key: str) -> st
         "[your segmentation prompt here]"
     )
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(model=config.MODEL_SEARCH, contents=prompt)
     output = response.text.strip()
     
     # Extract both sections using regex

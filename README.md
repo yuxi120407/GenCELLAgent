@@ -46,88 +46,105 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
 
 2. Create and activate the conda environment:
    ```bash
-   conda env create -f environment.yml
+   conda env create -f environment_new.yml
    conda activate gencell
    ```
 
-   This installs Python 3.12, PyTorch 2.7.0 (CUDA 12.6), and all required dependencies.
+   This installs Python 3.12, PyTorch 2.7.0 (CUDA 12.6), Cellpose, micro-SAM, CellSAM, and all required dependencies in a single environment.
 
-3. Install SAM3 (Segment Anything Model 3) as a local editable package:
+3. Install SAM3 and additional packages:
    ```bash
-   cd src/sam3
-   pip install -e ".[notebooks,train,dev]"
-   cd ../..
+   cd src/sam3 && pip install -e ".[notebooks,train,dev]" && cd ../..
+   pip install google-genai setuptools
    ```
 
-   > **Note:** SAM3 must be installed manually after environment creation. The source is already included at `src/sam3/`.
+   > **Note:** All model weights (VGG, Cellpose, micro-SAM, CellSAM, SAM3, SegGPT) are included in the repository under `models/` and `src/`. No additional downloads required.
 
-### API & Credentials Configuration
+### API Key Setup
 
-GenCellAgent requires three different API setups to function fully: **Vertex AI** (for the main reasoning loop), **Google AI Studio** (for tool-level summarization), and **SerpAPI** (for web searching).
+GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organelle segmentation, and evaluation. Only **two API keys** are needed:
 
-#### 1. Vertex AI Setup (Main Agent)
-The core "brain" of the agent uses Google Cloud Vertex AI. To authenticate, you must generate a Service Account JSON key:
+1. **Get a Google API Key:**
+   - Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Click "Create API Key" and copy it
 
-1.  **Create a Google Cloud Project:**
-    - Go to the [Google Cloud Console](https://console.cloud.google.com/).
-    - Click the project dropdown at the top and select **"New Project"**. Name it and click "Create".
-2.  **Enable the Vertex AI API:**
-    - In the top search bar, search for **"Vertex AI API"**.
-    - Click on it and click the blue **"Enable"** button.
-3.  **Generate a Service Account JSON Key:** 
-    - Open the left-hand navigation menu (hamburger icon) and go to **IAM & Admin > Service Accounts**.
-    - Click **"+ CREATE SERVICE ACCOUNT"** at the top.
-    - Give it a name (e.g., `gencell-agent-sa`) and click "Create and Continue".
-    - In the "Select a role" dropdown, search for and select **"Vertex AI User"**. Click "Continue", then "Done".
-    - You will now see your new service account in the list. Click on the **three vertical dots (Actions)** on the right side of your service account and select **"Manage keys"**.
-    - Click **"ADD KEY" > "Create new key"**.
-    - Choose **JSON** and click **"Create"**. The file will automatically download to your computer.
-4.  **Local Configuration:**
-    - Move the downloaded `.json` file into your project folder (e.g., `src/credentials/my-project-key.json`).
-    - Create the `config` directory if it doesn't exist:
-      ```bash
-      mkdir -p config
-      ```
-    - Copy the example config file and edit it with your credentials:
-      ```bash
-      cp config/config.example.yml config/config.yml
-      ```
-    - Edit `config/config.yml` with your actual values:
-      ```yaml
-      # GenCELLAgent Configuration File
-      # Fill in your Google Cloud / Vertex AI credentials below
+2. **Get a SerpAPI Key** (optional, for web search):
+   - Sign up at [SerpAPI](https://serpapi.com/) and copy your key
 
-      # Your Google Cloud Project ID (found on your GCP dashboard homepage)
-      project_id: "your-gcp-project-id"
+3. **Create a `.env` file** in the project root:
+   ```bash
+   GOOGLE_API_KEY=your_google_api_key_here
+   SERPAPI_API_KEY=your_serpapi_key_here
+   ```
 
-      # Google Cloud region (e.g., us-central1, us-east1, etc.)
-      region: "us-central1"
+That's it! No Google Cloud project, no Vertex AI, no service account JSON needed.
 
-      # Path to your Google Cloud service account JSON credentials file
-      # Use absolute path (e.g., /home/user/GenCELLAgent/src/credentials/my-key.json)
-      # You can leave this empty if using environment variables or default credentials
-      credentials_json: "/absolute/path/to/your/service-account-key.json"
+---
 
-      # Gemini model name to use
-      # Options: gemini-3-flash-preview, gemini-2.5-flash, etc.
-      model_name: "gemini-2.5-flash"
-      ```
+## 🧪 Batch Segmentation Pipeline
 
-#### 2. .env File Setup (Tools)
-For specialized tools (Search, Evaluation, etc.), create a `.env` file in the root of the project:
+GenCELLAgent provides a unified batch pipeline with **three segmentation modes**, automatically selected based on your natural language prompt:
+
+### Cell Mode — Automatic Tool Selection
+
+The system uses VGG style similarity to automatically select the best tool (Cellpose, micro-SAM, or CellSAM) for your image:
+
 ```bash
-touch .env
+# Auto-selects the best tool based on image style
+python batch_segment_new.py --image examples/cells/A172_Phase_A7_2_01d00h00m_4.tif --prompt "Help me segment all the cells in the provided image"
+
+# Different image types auto-route to different tools:
+python batch_segment_new.py --image examples/yeast/im051.tif --prompt "segment all cells"
+python batch_segment_new.py --image examples/plantseg/plantseg_root_val_Movie1_t00004_crop_gt_00013.tif --prompt "segment all cells"
+
+# Force a specific tool if needed:
+python batch_segment_new.py --image examples/yeast/im051.tif --prompt "segment cells" --tool cellsam
 ```
 
-Add the following keys to your `.env` file:
+### Organelle Mode — Gemini + SAM3 with Iterative Feedback
 
-- **Google API Key (AI Studio):**
-  1. Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
-  2. Add it to `.env`: `GOOGLE_API_KEY=your_ai_studio_key`
-  
-- **SerpAPI Key (Search):**
-  1. Get an API key from [SerpAPI](https://serpapi.com/).
-  2. Add it to `.env`: `SERPAPI_API_KEY=your_serp_api_key`
+For sub-cellular structures, Gemini generates segmentation prompts and iteratively refines results:
+
+```bash
+python batch_segment_new.py --image examples/golgi/images/sample_0000.png --prompt "segment the golgi" --max_iterations 3
+python batch_segment_new.py --image examples/mito/images/image_023FCj.png --prompt "find mitochondria" --max_iterations 3
+python batch_segment_new.py --image examples/er/images/image_1.png --prompt "segment ER" --max_iterations 3
+```
+
+### Reference Mode — SegGPT One-Shot Segmentation
+
+Provide a reference image-mask pair to segment similar structures in new images:
+
+```bash
+python batch_segment_new.py --image examples/er/images/image_101.png --prompt "segment using reference" --reference_image examples/er/images/image_1.png --reference_mask examples/er/labels/label_1.png
+```
+
+### Batch Processing
+
+Process all images in a directory:
+
+```bash
+python batch_segment_new.py --image_dir examples/cells/ --prompt "segment all cells"
+python batch_segment_new.py --image_dir examples/golgi/images/ --prompt "segment golgi" --max_iterations 5
+```
+
+### Python API
+
+```python
+from batch_segment_new import segment, batch_segment
+
+# Auto mode detection + tool selection
+result = segment("image.tif", prompt="Help me segment all cells")
+
+# Organelle with feedback loop
+result = segment("image.tif", prompt="segment golgi", max_iterations=5)
+
+# Reference-based one-shot
+result = segment("image.tif", prompt="segment", reference_image="ref.tif", reference_mask="mask.tif")
+
+# Batch processing
+results = batch_segment("path/to/images/", prompt="segment cells")
+```
 
 ---
 
@@ -172,103 +189,57 @@ The **Auto Organelle Segmentation** mode enables training-free segmentation of o
 
 ### ⚠️ Troubleshooting
 
-If you encounter configuration errors on startup:
+1. **"No API key was provided"**
+   - Make sure `.env` file exists in the project root with `GOOGLE_API_KEY=your_key`
 
-1. **"No such file or directory: './config/config.yml'"**
-   - Make sure you created the `config/config.yml` file in the project root directory
-   - Verify the file path: `/path/to/GenCELLAgent/config/config.yml`
-   - See the "API & Credentials Configuration" section above for the template
+2. **"No module named 'pkg_resources'"**
+   - Run `pip install setuptools`
 
-2. **"Failed to load the configuration file"**
-   - Check that your `config.yml` has proper YAML syntax
-   - Ensure all required fields are filled: `project_id`, `region`, `credentials_json`, `model_name`
-   - Use absolute paths for `credentials_json`, not relative paths
-
-3. **Authentication errors with Vertex AI**
-   - Verify your service account JSON file path is correct
-   - Ensure the Vertex AI API is enabled in your Google Cloud project
-   - Check that your service account has "Vertex AI User" role assigned
+3. **"GL ES 2.0 library not found"**
+   - This is a napari/OpenGL error on headless servers. The code auto-mocks napari, but if it appears, ensure `batch_segment_new.py` is used (not older scripts)
 
 ## 🔧 Developer Guide: Add a New Tool
 
-Use `cellpose` as the example. The same pattern works for other tools.
+All segmentation tools run directly in the same environment (no subprocess needed).
 
-### 1. Install the tool env
-
-If the tool needs its own environment, install it there and keep the Python path.
-
-Example:
-
-```bash
-python -m venv /path/to/cellpose_env
-/path/to/cellpose_env/bin/pip install cellpose
-```
-
-In this project, `cellpose` uses:
-
-```bash
-/home/idies/workspace/Storage/xyu1/persistent/pytorch_env/micro-sam/bin/python
-```
-
-### 2. Add a runner
-
-Put env-specific execution in a small runner script, not in `GUI_demo.py`.
-
-Example files:
-
-- [cell_segmentation_env_runner.py](/src/tools/cell_segmentation_env_runner.py)
-- [cell_segmentation_models.py](/src/tools/cell_segmentation_models.py)
-
-The wrapper calls the env Python with `subprocess.run(...)` and returns standard output paths.
-
-### 3. Return standard output keys
-
-To reuse the current GUI display logic, return:
-
-- `segment_save_path:`
-- `segment_mask_path:`
-
-Example:
+### 1. Add the tool function in `batch_segment_new.py`
 
 ```python
-return f"Cellpose segmentation completed successfully in segment_save_path:{overlay_path}, the corresponding mask saved in segment_mask_path:{mask_path}"
+def my_tool_segment_direct(image_path: str, save_dir: str = None, **_) -> str:
+    save_dir = save_dir or os.path.join("output", "batch_results")
+    # Your segmentation logic here
+    seg = my_tool.run(image_path)
+    overlay_path, mask_path = _save_overlay_and_mask(image_path, seg, save_dir, "my_tool")
+    return f"Segmentation completed in segment_save_path:{overlay_path}, segment_mask_path:{mask_path}"
 ```
 
-### 4. Add the tool to `GUI_demo.py`
-
-In [GUI_demo.py](/home/idies/workspace/Storage/xyu1/persistent/GenCELLAgent/GUI_demo.py):
-
-1. Import the wrapper.
-2. Add a new enum name in `Name`.
-3. Register the tool.
-4. If it is a segmentation tool, add it to the retry-count logic in `Agent.act(...)`.
-
-Example registration:
+### 2. Register in TOOL_MAP
 
 ```python
-st.session_state.agent.register(Name.CELLPOSE, cellpose_segment)
+TOOL_MAP = {
+    "cellpose": cellpose_segment_direct,
+    "micro_sam": micro_sam_segment_direct,
+    "cellsam": cellsam_segment_direct,
+    "my_tool": my_tool_segment_direct,  # Add here
+}
 ```
 
-### 5. Update the prompts
+### 3. Add to BEST_TOOL mapping
 
-Also update these two files so the LLM knows when to use the new tool:
+```python
+BEST_TOOL = {
+    ...
+    "MyDataset": "my_tool",  # Map a reference dataset to your tool
+}
+```
 
-- [prompt/react.txt](prompt/react.txt)
-- [prompt/planning.txt](prompt/planning.txt)
+### 4. Register in GUI_demo.py
 
-Add:
+```python
+from batch_segment_new import my_tool_segment_direct as my_tool_segment
+st.session_state.agent.register(Name.MY_TOOL, my_tool_segment)
+```
 
-- the tool name to the tool list
-- a short tool description
-- one JSON action example
-- a rule for when the planner should choose it
+### 5. Update prompts
 
-### 6. Final check
-
-Before using the tool, verify:
-
-- the env Python path is correct
-- the tool is added to `Name`
-- the tool is registered in `GUI_demo.py`
-- the prompt files mention it
-- it returns `segment_save_path` and `segment_mask_path`
+Add the tool to `prompt/react.txt` and `prompt/planning.txt` so the LLM knows when to use it.
