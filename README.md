@@ -81,7 +81,8 @@ GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organell
    SERPAPI_API_KEY=your_serpapi_key_here
    ```
 
-That's it! No Google Cloud project, no Vertex AI, no service account JSON needed.[Watch the API key setup tutorial](setup_api_key.mp4)
+That's it! No Google Cloud project, no Vertex AI, no service account JSON needed.[![API Key Setup Tutorial](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.j
+  pg)](https://youtu.be/YOUR_VIDEO_ID)  
 
 ---
 
