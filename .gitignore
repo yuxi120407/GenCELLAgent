@@ -9,8 +9,6 @@ __pycache__/
 
 # Environment and credentials
 .env
-config/config.yml
-config/config.yaml
 src/credentials/*.json
 *service-account*.json
 *credentials*.json

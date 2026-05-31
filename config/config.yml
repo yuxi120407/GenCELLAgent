@@ -1,0 +1,21 @@
+# GenCELLAgent Configuration
+# All agents use Google AI API (GOOGLE_API_KEY from .env)
+
+# --- LLM Models ---
+models:
+  # Main planning agent
+  agent: "gemini-3-flash-preview"
+  # Segmentation with SAM3
+  sam3_segment: "gemini-3-flash-preview"
+  # VLM evaluation
+  vlm_eval: "gemini-3-flash-preview"
+  # Segmentation quality evaluation
+  seg_eval: "gemini-3-flash-preview"
+  # Report summarizer
+  summarizer: "gemini-3-flash-preview"
+  # Web search
+  search: "gemini-3-flash-preview"
+
+# --- Checkpoints ---
+checkpoints:
+  sam3: "src/sam3/checkpoints/sam3/sam3.pt"
