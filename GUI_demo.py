@@ -28,7 +28,7 @@ from src.tools.serp_new import search as google_search_summary
 from src.tools.gemini_sam3_segment import gemini_sam3_segment
 from src.tools.gemini_vlm_eval import gemini_vlm_eval
 from src.tools.oneshot_segGPT import seggpt_inference_img
-from batch_segment_new import (
+from batch_segment import (
     cellpose_segment_direct as cellpose_segment,
     cellsam_segment_direct as cellsam_segment,
     micro_sam_segment_direct as micro_sam_segment,
