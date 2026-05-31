@@ -32,7 +32,7 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
 
 ## 🖥️ GUI Demo
 
-![GenCELLAgent GUI Demo](GUI_demo_screenshot.png)
+[![Watch GenCELLAgent Demo](https://img.youtube.com/vi/bSQHxXBTZis/0.jpg)](https://www.youtube.com/watch?v=bSQHxXBTZis)
 
 ## 🚀 Getting Started
 
