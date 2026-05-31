@@ -37,7 +37,7 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
 ## 🚀 Getting Started
 
 ### Installation
-   This requires Python 3.12 or higher, PyTorch 2.7 or higher, and a CUDA-compatible GPU with CUDA 12.6 or higher.
+   This requires Python 3.12 or higher, PyTorch 2.7 or higher, and a CUDA-compatible GPU with CUDA 12.6 or higher. [[Installation Setup Video Tutorial](https://www.youtube.com/watch?v=lolWgru3WwI)]  
    
 1. Clone the repository:
    ```bash
@@ -59,14 +59,14 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
    ```bash
    git clone https://github.com/facebookresearch/sam3.git src/sam3
    cd src/sam3 && pip install -e ".[notebooks,train,dev]" && cd ../..
-   pip install "tifffile<2025"
+     pip install "setuptools<70" "tifffile<2025"
    ```
 
    > **Note:** All model weights (VGG, Cellpose, micro-SAM, CellSAM, SAM3, SegGPT) can be downloaded from [models/README.md](models/README.md).
 
 ### API Key Setup
 
-GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organelle segmentation, and evaluation. Only **two API keys** are needed: [[API Key Setup Tutorial](https://youtu.be/l1jxXL--Pl0?si=BJWJEmEFU3Yf-ExL)]  
+GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organelle segmentation, and evaluation. Only **two API keys** are needed: [[API Key Setup Video Tutorial](https://youtu.be/l1jxXL--Pl0?si=BJWJEmEFU3Yf-ExL)]  
 
 1. **Get a Google API Key:**
    - Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
