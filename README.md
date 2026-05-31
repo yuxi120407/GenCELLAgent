@@ -47,7 +47,7 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
 
 2. Create and activate the conda environment:
    ```bash
-   conda env create -f environment_new.yml
+   conda env create -f environment.yml
    conda activate gencell
    ```
 3. Install miro-sam
@@ -82,6 +82,8 @@ GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organell
    ```
 
 That's it! No Google Cloud project, no Vertex AI, no service account JSON needed.
+
+> **Need help?** If you have any issues with installation, API key setup, or running the code, please feel free to [open an issue](https://github.com/yuxi120407/GenCELLAgent/issues). We will be more than happy to help you!
 
 ---
 
@@ -200,13 +202,13 @@ The **Auto Organelle Segmentation** mode enables training-free segmentation of o
    - Run `pip install setuptools`
 
 3. **"GL ES 2.0 library not found"**
-   - This is a napari/OpenGL error on headless servers. The code auto-mocks napari, but if it appears, ensure `batch_segment_new.py` is used (not older scripts)
+   - This is a napari/OpenGL error on headless servers. The code auto-mocks napari, but if it appears, ensure `batch_segment.py` is used (not older scripts)
 
 ## 🔧 Developer Guide: Add a New Tool
 
 All segmentation tools run directly in the same environment (no subprocess needed).
 
-### 1. Add the tool function in `batch_segment_new.py`
+### 1. Add the tool function in `batch_segment.py`
 
 ```python
 def my_tool_segment_direct(image_path: str, save_dir: str = None, **_) -> str:
@@ -240,7 +242,7 @@ BEST_TOOL = {
 ### 4. Register in GUI_demo.py
 
 ```python
-from batch_segment_new import my_tool_segment_direct as my_tool_segment
+from batch_segment import my_tool_segment_direct as my_tool_segment
 st.session_state.agent.register(Name.MY_TOOL, my_tool_segment)
 ```
 
