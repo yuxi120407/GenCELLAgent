@@ -43,10 +43,10 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
 </p>
 
 
-## 🚀 Getting Started
+## 🚀 Getting Started [[Installation Setup Video Tutorial](https://www.youtube.com/watch?v=lolWgru3WwI)]  
 
 ### Installation
-   This requires Python 3.12 or higher, PyTorch 2.7 or higher, and a CUDA-compatible GPU with CUDA 12.6 or higher. [[Installation Setup Video Tutorial](https://www.youtube.com/watch?v=lolWgru3WwI)]  
+   This requires Python 3.12 or higher, PyTorch 2.7 or higher, and a CUDA-compatible GPU with CUDA 12.6 or higher. 
    
 1. Clone the repository:
    ```bash
@@ -73,9 +73,9 @@ This design enables GenCELLAgent to perform segmentation tasks robustly without 
 
    > **Note:** All model weights (VGG, Cellpose, micro-SAM, CellSAM, SAM3, SegGPT) can be downloaded from [models/README.md](models/README.md).
 
-### API Key Setup
+### API Key Setup [[API Key Setup Video Tutorial](https://youtu.be/l1jxXL--Pl0?si=BJWJEmEFU3Yf-ExL)]  
 
-GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organelle segmentation, and evaluation. Only **two API keys** are needed: [[API Key Setup Video Tutorial](https://youtu.be/l1jxXL--Pl0?si=BJWJEmEFU3Yf-ExL)]  
+GenCELLAgent uses the Google Gemini API for LLM-powered mode detection, organelle segmentation, and evaluation. Only **two API keys** are needed: 
 
 1. **Get a Google API Key:**
    - Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
@@ -258,3 +258,6 @@ st.session_state.agent.register(Name.MY_TOOL, my_tool_segment)
 ### 5. Update prompts
 
 Add the tool to `prompt/react.txt` and `prompt/planning.txt` so the LLM knows when to use it.
+
+## Contributing
+We welcome pull requests for new segmentation tool. Open an issue to discuss ideas or share reproducible bug reports.
