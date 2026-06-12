@@ -30,8 +30,7 @@ GenCELLAgent’s architecture includes three coordinated modules:
 
 This design enables GenCELLAgent to perform segmentation tasks robustly without retraining, adapting to new domains with minimal supervision.
 
-## 🖥️ GUI Demo
-## 🖥️ GUI Demo
+## 🖥️ GUI Demo [[Watch GenCELLAgent Demo](https://www.youtube.com/watch?v=bSQHxXBTZis)]
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=bSQHxXBTZis">
